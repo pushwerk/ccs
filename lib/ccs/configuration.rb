@@ -1,55 +1,67 @@
+require 'fileutils'
+
 module CCS
   class Configuration
-    attr_accessor :api_key, :sender_id, :host, :connection_count
-    attr_accessor :redis_host
-    attr_reader :port, :redis_port
-    attr_reader :default_time_to_live, :default_delay_while_idle, :default_delivery_receipt_requested
+    attr_reader :connections
 
-    def initialize
-      @host             = 'gcm.googleapis.com'
-      @port             = 5235
-      @redis_host       = 'localhost'
-      @redis_port       = 6379
-      @connection_count = 1
+    FILENAME = 'config.yml'.freeze
+
+    def initialize(folder)
+      @default = false
+      @folder = folder
+      create_default_config unless File.exist?(path)
+      @config = YAML.load_file(path)
+      @connections = {}
+      @config['connections'].each do |connection|
+        @connections[connection['sender_id']] = connection
+      end
     end
 
-    def port=(value)
-      fail 'must be a fixnum' unless value.class == Fixnum
-      fail 'must be between 0 and 65535' unless value.between?(0, 65_535)
-      @port = value
+    def connection(sender_id)
+      return if sender_id.nil? || @connections[sender_id].nil?
+      defaults.merge(@connections[sender_id])
     end
 
-    def redis_port=(value)
-      fail 'must be a fixnum' unless value.class == Fixnum
-      fail 'must be between 0 and 65535' unless value.between?(0, 65_535)
-      @redis_port = value
+    def server_id
+      @config['server_id'] || 1
     end
 
-    def default_time_to_live=(value)
-      fail 'must be a fixnum' unless value.class == Fixnum
-      fail 'must be between 0 and 2419200 seconds' unless value.between?(0, 2_419_200)
-      @default_time_to_live = value
+    def redis
+      @config['redis'].merge(driver: :celluloid)
     end
 
-    def default_delay_while_idle=(value)
-      @default_delay_while_idle = value ? true : false
+    def defaults
+      return @defaults if @defaults
+      @defaults = @config['defaults'] || {}
+      @defaults['time_to_live'] ||= 600
+      @defaults['delay_while_idle'] ||= true
+      @defaults['delivery_receipt_requested'] ||= false
+      @defaults
     end
 
-    def default_delivery_receipt_requested=(value)
-      @default_delivery_receipt_requested = value ? true : false
+    def endpoint
+      @config['endpoint'][@config['mode']]
     end
 
-    def valid?
-      fail 'credentials not set' if api_key.nil? || sender_id.nil?
-      validate_redis
+    def default?
+      @default
+    end
+
+    def run?
+      !!@config['run']
+    end
+
+    def path
+      "#{@folder}/#{FILENAME}"
     end
 
     private
 
-    def validate_redis
-      RedisHelper.ping
-    rescue Redis::CannotConnectError => e
-      raise e.to_s
+    def create_default_config
+      FileUtils.mkdir_p(@folder) unless File.directory?(@folder)
+      template = File.join(File.expand_path('../../..', __FILE__), 'config', 'ccs.yml')
+      FileUtils.cp(template, path)
+      @default = true
     end
   end
 end

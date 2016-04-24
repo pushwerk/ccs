@@ -8,22 +8,32 @@ Gem::Specification.new do |spec|
   spec.version       = CCS::VERSION
   spec.authors       = ['l3akage']
   spec.email         = ['info@l3akage.de']
+
+  spec.homepage      = 'https://github.com/l3akage/ccs'
   spec.summary       = 'Implementation of Google CCS-API'
-  spec.description   = 'Implementation of Google CCS-API'
-  spec.homepage      = ''
+  spec.description   = 'Google XMPP GCM Server as ruby gem using Celluloid and Redis'
   spec.license       = 'MIT'
 
-  spec.files         = `git ls-files -z`.split("\x0")
-  spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
+  # Prevent pushing this gem to RubyGems.org by setting "allowed_push_host", or
+  # delete this section to allow pushing this gem to any host.
+  if spec.respond_to?(:metadata)
+    spec.metadata['allowed_push_host'] = 'TODO: Set to "http://mygemserver.com"'
+  else
+    raise 'RubyGems 2.0 or newer is required to protect against public gem pushes.'
+  end
+
+  spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
+  spec.executables   = %w( ccs_server )
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ['lib']
 
-  spec.add_dependency 'celluloid-redis'
-  spec.add_dependency 'hiredis'
-  spec.add_dependency 'redis'
-  spec.add_dependency 'ox'
-  spec.add_dependency 'oj'
+  spec.required_ruby_version = '>= 2.0.0'
 
-  spec.add_development_dependency 'bundler'
-  spec.add_development_dependency 'rake'
+  spec.add_dependency 'celluloid', '~> 0.17.3'
+  spec.add_dependency 'celluloid-redis', '~> 0.0.2'
+  spec.add_dependency 'redis', '~> 3.3'
+  spec.add_dependency 'nokogiri', '~> 1.6'
+
+  spec.add_development_dependency 'bundler', '~> 1.11'
+  spec.add_development_dependency 'rake', '~> 11.1'
 end

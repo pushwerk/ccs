@@ -2,24 +2,24 @@ require 'monitor'
 
 module CCS
   class Semaphore
-    def initialize(max = 100)
+    def initialize(max = MAX_MESSAGES)
       @max = max
       @current = 0
-      @con = Celluloid::Condition.new
+      @condition = Celluloid::Condition.new
     end
 
     def take
-      return if @con.wait if @current == @max
+      return if @current == @max && @condition.wait
       @current += 1
     end
 
     def release
-      @con.signal(false) if @current == @max
+      @condition.signal(false) if @current == @max
       @current -= 1
     end
 
     def interrupt
-      @con.signal(true)
+      @condition.signal(true)
     end
   end
 end

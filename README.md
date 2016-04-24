@@ -6,87 +6,133 @@ See https://developer.android.com/google/gcm/ccs.html for more informations
 
 ## Installation
 
-Add this line to your application's Gemfile:
-
-    gem 'ccs', git: 'https://github.com/l3akage/ccs.git'
-
-And then execute:
-
-    $ bundle
-
-## Usage
-
 ```
-require 'ccs'
+git clone https://github.com/l3akage/ccs.git
+cd ccs && gem build ccs.gemspec
+gem install ccs-*.gem
 ```
 
-Configuration:
+## Configure
+
+Starting `ccs_server` once places a config file in `~/.config/ccs/config.yml`
+
+### Run
+Change this to `true` to make the server run
 
 ```
-CCS.configure do |config|
-  # required
-  config.api_key = API_KEY
-  config.sender_id = SENDER_IP
-  # optional:
-  config.host = 'gcm.googleapis.com'                # XMPP host
-  config.port = 5235                                # XMPP port
-  config.connection_count = 1                       # XMPP connection count
-  config.redis_port = 6379                          # Redis port
-  config.redis_host = 'localhost'                   # Redis host
-  config.default_time_to_live = 600                 # time_to_live value
-  config.default_delay_while_idle = true            # delay_while_idle value
-  config.default_delivery_receipt_requested = true  # delivery_receipt_requested value
-end
+run: false
 ```
 
-Delivery receipt callback
+## Server ID
+Not yet used (only for redis list naming)
 
 ```
-CCS.on_receipt do |msg|
-  puts "RECEIPT: #{msg}"
-end
+server_id: 1
 ```
 
-Error callback
+### Mode
+Switch between both endpoints
 
 ```
-CCS.on_error do |msg|
+mode: 'development'
+endpoint:
+  production:
+    host: 'gcm-xmpp.googleapis.com'
+    port: 5235
+  development:
+    host: 'gcm-preprod.googleapis.com'
+    port: 5236
+```
+
+### Redis
+Redis config
+
+```
+redis:
+  host: '127.0.0.1'
+  port: 6379
+  # password: 'foobar' # optional
+  # or
+  # url: 'redis://:foobar@127.0.0.1:6379'
+```
+
+### Default values
+Defaults for all messages
+
+```
+defaults:
+  time_to_live: 600
+  delay_while_idle: true
+  delivery_receipt_requested: false
+```
+
+### Sender IDs
+List of sender ids the CCS should handle. Each sender id can have up to 1000 connections
+
+```
+connections:
+  - sender_id: SENDER_ID
+    api_key: API_KEY
+    connection_count: 10
+    time_to_live: 300
+  - sender_id: SENDER_ID2
+    api_key: API_KEY2
+    connection_count: 20
+    time_to_live: 6000
+    delay_while_idle: true
+    delivery_receipt_requested: false
+ ```
+
+## Start server
+
+```
+ccs_server
+```
+
+## Send messages
+
+```
+require 'ccs/api'
+
+CCS::API.send(sender_id, to, data = {}, options = {})
+```
+
+# example
+
+```
+CCS.send(SENDER_ID, USER_KEY, {text: 'Hello World!'}, { time_to_live: 300, delivery_receipt_requested: true })
+```
+
+## Handle messages
+
+```
+require 'ccs/handler'
+
+handler = CCS::Handler.new(SENDER_ID)
+handler.on_error do |msg|
   puts "ERROR: #{msg}"
 end
-```
 
-Upstream callback
+handler.on_receipt do |msg|
+  puts "RECEIPT: #{msg}"
+end
 
-```
-CCS.on_upstream do |msg|
+handler.on_upstream do |msg|
   puts "UPSTREAM: #{msg}"
 end
+
+handler.start # start in background
+handler.start! # start in foreground
 ```
 
-Logger
+## Logger
 
 ```
 CCS.logger.level = Logger::DEBUG
 ```
 
-Start connection
-
-```
-CCS.start
-```
-
-Sending data
-
-```
-CCS.send(to, data = {}, options = {})
-
-# example
-
-CCS.send(USER_KEY, {text: 'Hello World!'}, { time_to_live: 300, delivery_receipt_requested: true })
-```
-
 ## TODO
-* Tests!!!
+* TeStS !1!1
 
 ## Contributing
 

@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+
+require 'ccs'
+
+logger = Logger.new($stdout)
+logger.level = Logger::INFO
+
+CCS.logger = logger
+CCS.start
+gets

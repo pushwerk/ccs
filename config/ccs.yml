@@ -1,0 +1,30 @@
+---
+run: false # change to true
+server_id: 1
+mode: 'development'
+endpoint:
+  production:
+    host: 'gcm-xmpp.googleapis.com'
+    port: 5235
+  development:
+    host: 'gcm-preprod.googleapis.com'
+    port: 5236
+
+redis:
+  host: '127.0.0.1'
+  port: 6379
+  # password: 'foobar' # optional
+  # or
+  # url: 'redis://:foobar@127.0.0.1:6379'
+
+# can be overriden per sender_id
+defaults:
+  time_to_live: 600
+  delay_while_idle: true
+  delivery_receipt_requested: false
+
+# add multiple sender_ids here
+connections:
+  - sender_id: SENDER_ID
+    api_key: API_KEY
+    connection_count: 1
