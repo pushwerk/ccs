@@ -7,7 +7,7 @@ See https://developer.android.com/google/gcm/ccs.html for more informations
 ## Installation
 
 ```
-git clone https://github.com/l3akage/ccs.git
+git clone https://github.com/pushwerk/ccs.git
 cd ccs && gem build ccs.gemspec
 gem install ccs-*.gem
 ```
@@ -136,7 +136,7 @@ CCS.logger.level = Logger::DEBUG
 
 ## Contributing
 
-1. Fork it ( https://github.com/l3akage/ccs/fork )
+1. Fork it ( https://github.com/pushwerk/ccs/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)

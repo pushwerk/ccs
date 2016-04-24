@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ['l3akage']
   spec.email         = ['info@l3akage.de']
 
-  spec.homepage      = 'https://github.com/l3akage/ccs'
+  spec.homepage      = 'https://github.com/pushwerk/ccs'
   spec.summary       = 'Implementation of Google CCS-API'
   spec.description   = 'Google XMPP GCM Server as ruby gem using Celluloid and Redis'
   spec.license       = 'MIT'
